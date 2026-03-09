@@ -1,32 +1,43 @@
-const PROGRESS_KEY = "gradify_progress";
+import { AuthService } from "./authService.js";
 
-function getProgress() {
-  const data = localStorage.getItem(PROGRESS_KEY);
-  if (!data) {
-    return { totalNotes: 0, recentTopics: [] };
-  }
-  return JSON.parse(data);
-}
-
-function saveProgress(data) {
-  localStorage.setItem(PROGRESS_KEY, JSON.stringify(data));
-}
+const API_URL = 'http://localhost:3001/api';
 
 export const ProgressService = {
-  recordNoteGenerated(topic) {
-    const progress = getProgress();
-    progress.totalNotes++;
-    
-    // Add current topic to top of string list, keep up to 10
-    progress.recentTopics.unshift(topic);
-    if (progress.recentTopics.length > 10) {
-      progress.recentTopics.pop();
+  async recordNoteGenerated(topic) {
+    try {
+      const token = AuthService.getToken();
+      if (!token) return;
+
+      await fetch(`${API_URL}/user/progress`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ topic })
+      });
+    } catch (err) {
+      console.error("Failed to record progress:", err);
     }
-    
-    saveProgress(progress);
   },
   
-  getStats() {
-    return getProgress();
+  async getStats() {
+    try {
+      const token = AuthService.getToken();
+      if (!token) return { totalNotes: 0, recentTopics: [] };
+
+      const resp = await fetch(`${API_URL}/user/progress`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (resp.ok) {
+        return await resp.json();
+      }
+    } catch (err) {
+      console.error("Failed to fetch stats:", err);
+    }
+    return { totalNotes: 0, recentTopics: [] };
   }
 };

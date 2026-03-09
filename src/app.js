@@ -1,6 +1,6 @@
 import { AuthService } from "./api/authService.js";
 import { ProgressService } from "./api/progressService.js";
-import { createDashboardView } from "./ui/dashboardView.js";
+import { createDashboardView, renderLessons } from "./ui/dashboardView.js";
 import { createGenerationView } from "./ui/generationView.js";
 import { createLoginView } from "./ui/loginView.js";
 import { createRegisterView } from "./ui/registerView.js";
@@ -140,7 +140,7 @@ export function createApp(elements) {
   });
 
 
-  function handleRouteChange() {
+  async function handleRouteChange() {
     let screen = screenFromHash(window.location.hash);
     
     // Route Guard
@@ -161,6 +161,13 @@ export function createApp(elements) {
       generationView.showInput();
     } else if (screen === Screen.PROFILE) {
       profileView.render();
+    } else if (screen === Screen.DASHBOARD) {
+      // Show loading state temporarily if desired, or just await
+      const grid = document.getElementById('dashboardLessonGrid');
+      if (grid) grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 2rem;">Loading lessons...</div>';
+      
+      const stats = await ProgressService.getStats();
+      renderLessons(stats.recentTopics, document.getElementById('dashboardLessonGrid'));
     }
   }
 

@@ -4,7 +4,7 @@ import { AuthService } from "../api/authService.js";
 export function createProfileView({ elements }) {
   const { title, avatar, email, totalNotesStat, recentTopicsList } = elements;
 
-  function render() {
+  async function render() {
     const user = AuthService.getCurrentUser();
     if (user && user.username) {
       title.textContent = `${user.username}'s Profile`;
@@ -16,11 +16,13 @@ export function createProfileView({ elements }) {
       if (email) email.textContent = `${user.username.toLowerCase().replace(/[^a-z0-9]/g, '')}@student.gradify.app`;
     }
 
-    const stats = ProgressService.getStats();
-    totalNotesStat.textContent = stats.totalNotes;
+    recentTopicsList.innerHTML = `<li style="text-align: center; color: var(--color-muted);">Loading your progress...</li>`;
+
+    const stats = await ProgressService.getStats();
+    totalNotesStat.textContent = stats.totalNotes || 0;
 
     recentTopicsList.innerHTML = "";
-    if (stats.recentTopics.length === 0) {
+    if (!stats.recentTopics || stats.recentTopics.length === 0) {
       recentTopicsList.innerHTML = `<li class="empty-state">No notes generated yet.</li>`;
     } else {
       stats.recentTopics.forEach(topic => {

@@ -1,51 +1,65 @@
+const API_URL = 'http://localhost:3001/api';
+
 export const AuthService = {
-  _getUsers() {
-    const users = localStorage.getItem("gradify_users");
-    return users ? JSON.parse(users) : [];
-  },
-
-  _saveUsers(users) {
-    localStorage.setItem("gradify_users", JSON.stringify(users));
-  },
-
-  login(username, password) {
-    const users = this._getUsers();
-    const user = users.find(u => u.username === username && u.password === password);
-    
-    if (user) {
-      localStorage.setItem("gradify_user", JSON.stringify({ username }));
+  async login(username, password) {
+    try {
+      const resp = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      
+      if (!resp.ok) return false;
+      
+      const data = await resp.json();
+      localStorage.setItem("gradify_token", data.token);
+      localStorage.setItem("gradify_username", data.username);
       window.location.hash = "#dashboard";
       return true;
+    } catch (err) {
+      console.error("Login error:", err);
+      return false;
     }
-    return false;
   },
   
-  register(username, password) {
-    const users = this._getUsers();
-    if (users.find(u => u.username === username)) {
-      return false; // Username already exists
+  async register(username, password) {
+    try {
+      const resp = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      
+      if (!resp.ok) return false;
+      
+      const data = await resp.json();
+      localStorage.setItem("gradify_token", data.token);
+      localStorage.setItem("gradify_username", data.username);
+      window.location.hash = "#dashboard";
+      return true;
+    } catch (err) {
+      console.error("Register error:", err);
+      return false;
     }
-    
-    users.push({ username, password });
-    this._saveUsers(users);
-    
-    // Auto login
-    localStorage.setItem("gradify_user", JSON.stringify({ username }));
-    window.location.hash = "#dashboard";
-    return true;
   },
   
   logout() {
-    localStorage.removeItem("gradify_user");
+    localStorage.removeItem("gradify_token");
+    localStorage.removeItem("gradify_username");
     window.location.hash = "#home";
   },
   
+  getToken() {
+    return localStorage.getItem("gradify_token");
+  },
+  
   getCurrentUser() {
-    const user = localStorage.getItem("gradify_user");
-    return user ? JSON.parse(user) : null;
+    const token = this.getToken();
+    const username = localStorage.getItem("gradify_username");
+    return token ? { username, token } : null;
   },
   
   isAuthenticated() {
-    return this.getCurrentUser() !== null;
+    return !!this.getToken();
   }
 };

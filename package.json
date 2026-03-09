@@ -4,7 +4,15 @@
   "description": "Gradify v1 web MVP",
   "type": "module",
   "scripts": {
+    "start": "npx concurrently \"npm run start:frontend\" \"npm run start:backend\"",
+    "start:frontend": "npx serve . -p 3000",
+    "start:backend": "node server/index.js",
     "test": "node --test"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "sqlite3": "^5.1.7"
   }
 }
-
