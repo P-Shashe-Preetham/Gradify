@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gradify v1</title>
+    <link rel="stylesheet" href="./styles/main.css" />
+  </head>
+  <body>
+    <!-- Interactive Background -->
+    <canvas id="bgCanvas" class="bg-canvas"></canvas>
+
+    <nav id="appNav" class="app-nav" hidden>
+      <div class="nav-brand">Gradify</div>
+      <div class="nav-links">
+        <button id="navHome" class="nav-link" type="button">Home</button>
+        <button id="navDashboard" class="nav-link" type="button" hidden>Dashboard</button>
+        <button id="navGenerate" class="nav-link" type="button" hidden>Generate Notes</button>
+        <button id="navProfile" class="nav-link" type="button" hidden>Profile</button>
+        <button id="navLogout" class="nav-link nav-link-logout" type="button" hidden>Logout</button>
+        <button id="navLogin" class="nav-link" type="button">Login</button>
+      </div>
+    </nav>
+
+    <div class="app-shell">
+      <section id="loginScreen" class="screen screen-active" aria-labelledby="loginTitle">
+        <div class="login-card">
+          <p class="eyebrow">Welcome to Gradify</p>
+          <h1 id="loginTitle" class="dashboard-title">Sign in to your account</h1>
+          <form id="loginForm" class="login-form">
+            <input type="text" id="usernameInput" placeholder="Username" required class="login-input" />
+            <input type="password" id="passwordInput" placeholder="Password" required class="login-input" />
+            <div id="loginError" class="auth-error" hidden>Invalid username or password</div>
+            <button type="submit" class="button button-primary log-btn">Continue</button>
+          </form>
+          <p class="auth-toggle">Don't have an account? <a href="#register">Sign up</a></p>
+        </div>
+      </section>
+
+      <section id="registerScreen" class="screen" aria-labelledby="registerTitle" hidden>
+        <div class="login-card">
+          <p class="eyebrow">Join Gradify</p>
+          <h1 id="registerTitle" class="dashboard-title">Create an account</h1>
+          <form id="registerForm" class="login-form">
+            <input type="text" id="regUsernameInput" placeholder="Choose a username" required class="login-input" />
+            <input type="password" id="regPasswordInput" placeholder="Create a password" required class="login-input" />
+            <div id="regError" class="auth-error" hidden>Username already exists</div>
+            <button type="submit" class="button button-primary log-btn">Sign Up</button>
+          </form>
+          <p class="auth-toggle">Already have an account? <a href="#login">Log in</a></p>
+        </div>
+      </section>
+
+      <section id="dashboardScreen" class="screen" aria-labelledby="dashTitle" hidden>
+        <div class="dashboard-hero">
+          <p class="eyebrow">Your Learning Hub</p>
+          <h1 id="dashTitle" class="dashboard-title">Welcome Back</h1>
+          <p class="dashboard-subtitle">Pick up where you left off or generate new study materials.</p>
+          <div style="display: flex; gap: 1rem; justify-content: center;">
+            <button id="dashGenerateBtn" class="button button-primary" type="button">Create New Note</button>
+            <button id="dashProfileBtn" class="button button-secondary" type="button">View Profile</button>
+          </div>
+        </div>
+        
+        <div class="dashboard-lessons">
+          <h2>Featured Mini-Lessons</h2>
+          <div class="lesson-grid">
+            <div class="lesson-card">
+              <div class="lesson-icon">🧠</div>
+              <div class="lesson-content">
+                <h3>Introduction to AI Concepts</h3>
+                <p>Learn the fundamentals of artificial intelligence, machine learning, and neural networks.</p>
+                <div class="lesson-actions">
+                  <button class="button button-secondary button-sm btn-read-notes" data-topic="intro-ai">Read Notes</button>
+                  <button class="button button-primary button-sm btn-take-quiz" data-topic="intro-ai">Take Quiz</button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="lesson-card">
+              <div class="lesson-icon">⚛️</div>
+              <div class="lesson-content">
+                <h3>Quantum Physics Basics</h3>
+                <p>A high-level overview of superposition, entanglement, and quantum computing.</p>
+                <div class="lesson-actions">
+                  <button class="button button-secondary button-sm btn-read-notes" data-topic="quantum">Read Notes</button>
+                  <button class="button button-primary button-sm btn-take-quiz" data-topic="quantum">Take Quiz</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quiz Modal -->
+      <div id="quizModal" class="quiz-modal-backdrop" hidden>
+        <div class="quiz-modal">
+          <button id="closeQuizBtn" class="quiz-close" aria-label="Close Quiz">×</button>
+          <div class="quiz-content">
+            <p class="eyebrow" id="quizTopic">Intro to AI</p>
+            <h2 id="quizQuestion">Loading question...</h2>
+            <div id="quizOptions" class="quiz-options">
+              <!-- Options populated via JS -->
+            </div>
+            <div id="quizFeedback" class="quiz-feedback" hidden></div>
+          </div>
+        </div>
+      </div>
+        
+      <section id="homeScreen" class="screen" aria-labelledby="homeTitle" hidden>
+        <div class="dashboard-hero">
+          <p class="eyebrow">Gradify AI Note Generator</p>
+          <h1 id="homeTitle" class="dashboard-title">Generate AI Study Notes in Seconds</h1>
+          <p class="dashboard-subtitle">
+            Paste your lectures, ask complex questions, and get structured, beautifully formatted notes instantly.
+          </p>
+          <button id="startLearningButton" class="button button-primary" type="button">
+            Start Learning
+          </button>
+        </div>
+        
+        <div class="dashboard-features">
+          <h2>How it Works</h2>
+          <div class="feature-grid">
+            <div class="feature-card">
+              <div class="feature-icon">📝</div>
+              <h3>1. Paste Material</h3>
+              <p>Just copy and paste any study material, lecture notes, or topic you want to learn about.</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">🤖</div>
+              <h3>2. AI Generation</h3>
+              <p>Our mock AI processes your text and extracts the most important key concepts and summaries.</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">📈</div>
+              <h3>3. Track Progress</h3>
+              <p>Every note generated is automatically saved to your profile so you can track your learning journey over time.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="profileScreen" class="screen" aria-labelledby="profileTitle" hidden>
+        <div class="profile-container">
+          <div class="profile-header">
+            <div id="profileAvatar" class="avatar">U</div>
+            <div class="profile-info">
+              <h1 id="profileTitle">Your Profile</h1>
+              <p id="profileEmail" class="profile-email">student@university.edu</p>
+            </div>
+          </div>
+          
+          <div class="stats-grid">
+            <div class="stat-card">
+              <span class="stat-value" id="totalNotesStat">0</span>
+              <span class="stat-label">Notes Generated</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value">1</span>
+              <span class="stat-label">Days Active</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value">Pro</span>
+              <span class="stat-label">Account Tier</span>
+            </div>
+          </div>
+          
+          <div class="recent-topics">
+            <h2>Recent Topics</h2>
+            <ul id="recentTopicsList" class="topics-list">
+              <li class="empty-state">No notes generated yet.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="feedScreen" class="screen" aria-live="polite" aria-label="Learning feed">
+        <header class="feed-header">
+          <span class="feed-brand">Gradify</span>
+          <span class="feed-tag">Note Generator</span>
+        </header>
+
+        <main id="generationContainer" class="generation-container">
+          <div class="input-section">
+            <h2>What do you want to learn?</h2>
+            <textarea id="noteInput" placeholder="Paste your study material here, or ask a question like 'Explain Quantum Physics'..." aria-label="Study material input"></textarea>
+            <button id="generateButton" class="button button-primary" type="button" disabled>Generate Notes</button>
+          </div>
+
+          <div id="outputSection" class="output-section" hidden>
+            <div id="loadingState" class="state-layer" role="status">
+              <div class="loader"></div>
+              <p>Generating your study notes...</p>
+            </div>
+            
+            <div id="notesResult" class="notes-result" hidden>
+              <div class="notes-actions">
+                <button id="copyButton" class="button button-secondary button-sm" type="button">Copy</button>
+                <button id="resetButton" class="button button-secondary button-sm" type="button">New Note</button>
+              </div>
+              <div id="notesContent" class="notes-content"></div>
+            </div>
+            
+            <div id="errorState" class="state-layer state-error" role="status" hidden>
+              <h2>Couldn't generate notes</h2>
+              <p id="errorMessage">Please try again.</p>
+              <button id="retryButton" class="button button-secondary" type="button">Retry</button>
+            </div>
+          </div>
+        </main>
+      </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
+
