@@ -21,6 +21,24 @@ export const ProgressService = {
     }
   },
   
+  async recordQuizScore(topic, score, total_questions) {
+    try {
+      const token = AuthService.getToken();
+      if (!token) return;
+
+      await fetch(`${API_URL}/quiz/score`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ topic, score, total_questions })
+      });
+    } catch (err) {
+      console.error("Failed to record quiz score:", err);
+    }
+  },
+  
   async getStats() {
     try {
       const token = AuthService.getToken();

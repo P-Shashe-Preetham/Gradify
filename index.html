@@ -135,8 +135,8 @@
               <span class="stat-label">Notes Generated</span>
             </div>
             <div class="stat-card">
-              <span class="stat-value">1</span>
-              <span class="stat-label">Days Active</span>
+              <span class="stat-value" id="averageScoreStat">-</span>
+              <span class="stat-label">Avg Quiz Score</span>
             </div>
             <div class="stat-card">
               <span class="stat-value">Pro</span>
@@ -176,6 +176,7 @@
               <div class="notes-actions">
                 <button id="copyButton" class="button button-secondary button-sm" type="button">Copy</button>
                 <button id="resetButton" class="button button-secondary button-sm" type="button">New Note</button>
+                <button id="notesQuizBtn" class="button button-primary button-sm" type="button" hidden>Take Quiz</button>
               </div>
               <div id="notesContent" class="notes-content"></div>
             </div>

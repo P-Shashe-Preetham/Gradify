@@ -2,7 +2,7 @@ import { ProgressService } from "../api/progressService.js";
 import { AuthService } from "../api/authService.js";
 
 export function createProfileView({ elements }) {
-  const { title, avatar, email, totalNotesStat, recentTopicsList } = elements;
+  const { title, avatar, email, totalNotesStat, avgScoreStat, recentTopicsList } = elements;
 
   async function render() {
     const user = AuthService.getCurrentUser();
@@ -20,6 +20,12 @@ export function createProfileView({ elements }) {
 
     const stats = await ProgressService.getStats();
     totalNotesStat.textContent = stats.totalNotes || 0;
+    
+    if (avgScoreStat) {
+      avgScoreStat.textContent = stats.averageScore !== null && stats.averageScore !== undefined 
+        ? `${stats.averageScore}%` 
+        : '-';
+    }
 
     recentTopicsList.innerHTML = "";
     if (!stats.recentTopics || stats.recentTopics.length === 0) {

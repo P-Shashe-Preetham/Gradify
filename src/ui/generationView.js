@@ -1,5 +1,6 @@
-import { generateNotes } from "../api/mockGenerativeAI.js";
+import { AuthService } from "../api/authService.js";
 
+const API_URL = 'http://localhost:3001/api';
 function setStateVisibility({ elements, showInput, showLoading, showResult, showError }) {
   elements.inputSection.hidden = !showInput;
   elements.outputSection.hidden = !showLoading && !showResult && !showError;
@@ -28,14 +29,35 @@ export function createGenerationView({ elements, handlers }) {
     setStateVisibility({ elements, showInput: false, showLoading: true, showResult: false, showError: false });
 
     try {
-      const markdown = await generateNotes(text);
+      const token = AuthService.getToken();
+      
+      const response = await fetch(`${API_URL}/generate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ topic: text })
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate notes. Please try again.");
+      }
+
+      const data = await response.json();
+      const topicTitle = data.topic || text;
+      const combinedMarkdown = `# ${topicTitle}\n\n## Study Notes\n${data.notes}\n\n## Step-by-Step Lesson Plan\n${data.lessonPlan}`;
       
       // Parse markdown to HTML using the 'marked' library injected in index.html
-      const htmlContent = window.marked ? window.marked.parse(markdown) : markdown;
+      const htmlContent = window.marked ? window.marked.parse(combinedMarkdown) : combinedMarkdown;
       notesContent.innerHTML = htmlContent;
 
       // Show Result
       setStateVisibility({ elements, showInput: false, showLoading: false, showResult: true, showError: false });
+      
+      if (handlers && handlers.onQuizReady && data.quiz) {
+        handlers.onQuizReady({ topic: topicTitle, questions: data.quiz });
+      }
     } catch (error) {
       errorMessage.textContent = error.message || "An unexpected error occurred.";
       // Show Error

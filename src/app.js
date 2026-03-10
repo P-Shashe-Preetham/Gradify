@@ -72,6 +72,7 @@ export function createApp(elements) {
     profileAvatar,
     profileEmail,
     totalNotesStat,
+    averageScoreStat,
     recentTopicsList,
     dashboardLessonScreen,
     quizModal,
@@ -79,7 +80,8 @@ export function createApp(elements) {
     quizTopic,
     quizQuestion,
     quizOptions,
-    quizFeedback
+    quizFeedback,
+    notesQuizBtn
   } = elements;
 
   const screens = { homeScreen, loginScreen, registerScreen, dashboardScreen, feedScreen, profileScreen };
@@ -100,6 +102,7 @@ export function createApp(elements) {
       avatar: profileAvatar,
       email: profileEmail,
       totalNotesStat, 
+      avgScoreStat: averageScoreStat,
       recentTopicsList 
     }
   });
@@ -110,7 +113,13 @@ export function createApp(elements) {
       inputSection, outputSection, loadingState, notesResult, notesContent, errorState, errorMessage
     },
     handlers: {
-      onReset: () => {}
+      onReset: () => {
+        notesQuizBtn.hidden = true;
+      },
+      onQuizReady: (quizData) => {
+        notesQuizBtn.hidden = false;
+        notesQuizBtn.onclick = () => quizView.openModal(quizData);
+      }
     }
   });
 

@@ -1,66 +1,81 @@
+import { ProgressService } from "../api/progressService.js";
+
 export function createQuizView({ elements }) {
   const { modal, closeBtn, topicLabel, questionLabel, optionsContainer, feedbackLabel } = elements;
 
-  const quizData = {
-    'intro-ai': {
-      title: 'Intro to AI',
-      question: 'Which of the following is considered a subset of Artificial Intelligence?',
-      options: ['Cloud Computing', 'Machine Learning', 'Quantum Cryptography', 'Blockchain'],
-      answerIndex: 1
-    },
-    'quantum': {
-      title: 'Quantum Physics Basics',
-      question: 'What principle states that a quantum system can exist in multiple states at once?',
-      options: ['Superposition', 'Entanglement', 'Relativity', 'Thermodynamics'],
-      answerIndex: 0
+  let currentQuizData = null;
+  let currentQuestionIndex = 0;
+  let currentScore = 0;
+
+  function loadQuestion() {
+    if (!currentQuizData || currentQuestionIndex >= currentQuizData.questions.length) {
+      finishQuiz();
+      return;
     }
-  };
 
-  let currentTopic = null;
-
-  function openModal(topicId) {
-    currentTopic = quizData[topicId];
-    if (!currentTopic) return;
-
-    topicLabel.textContent = currentTopic.title;
-    questionLabel.textContent = currentTopic.question;
+    const q = currentQuizData.questions[currentQuestionIndex];
+    topicLabel.textContent = `${currentQuizData.topic} (Question ${currentQuestionIndex + 1}/${currentQuizData.questions.length})`;
+    questionLabel.textContent = q.question;
     feedbackLabel.hidden = true;
     feedbackLabel.className = 'quiz-feedback';
     optionsContainer.innerHTML = '';
 
-    currentTopic.options.forEach((optText, idx) => {
+    q.options.forEach((optText, idx) => {
       const btn = document.createElement('button');
       btn.className = 'quiz-option-btn';
       btn.textContent = optText;
       btn.onclick = () => handleAnswer(idx);
       optionsContainer.appendChild(btn);
     });
+  }
 
+  function openModal(quizData) {
+    if (!quizData || !quizData.questions || quizData.questions.length === 0) return;
+    currentQuizData = quizData;
+    currentQuestionIndex = 0;
+    currentScore = 0;
     modal.hidden = false;
+    loadQuestion();
+  }
+
+  function finishQuiz() {
+    topicLabel.textContent = currentQuizData.topic;
+    questionLabel.textContent = `Quiz Complete! You scored ${currentScore} out of ${currentQuizData.questions.length}.`;
+    optionsContainer.innerHTML = '';
+    feedbackLabel.hidden = true;
+    
+    // Upload Score
+    ProgressService.recordQuizScore(currentQuizData.topic, currentScore, currentQuizData.questions.length);
   }
 
   function closeModal() {
     modal.hidden = true;
-    currentTopic = null;
+    currentQuizData = null;
   }
 
   function handleAnswer(selectedIndex) {
     const buttons = Array.from(optionsContainer.children);
-    
-    // Disable all options
     buttons.forEach(btn => btn.style.pointerEvents = 'none');
 
-    const isCorrect = selectedIndex === currentTopic.answerIndex;
+    const q = currentQuizData.questions[currentQuestionIndex];
+    const isCorrect = selectedIndex === q.answerIndex;
     
-    // Highlight correct & incorrect
-    buttons[currentTopic.answerIndex].classList.add('correct');
+    if (isCorrect) currentScore++;
+
+    buttons[q.answerIndex].classList.add('correct');
     if (!isCorrect) {
       buttons[selectedIndex].classList.add('incorrect');
     }
 
-    feedbackLabel.textContent = isCorrect ? 'Correct! Great job.' : 'Incorrect. Review your notes and try again!';
+    feedbackLabel.textContent = isCorrect ? 'Correct!' : 'Incorrect!';
     feedbackLabel.className = `quiz-feedback ${isCorrect ? 'success' : 'error'}`;
     feedbackLabel.hidden = false;
+
+    // Wait 2 seconds, then load next question
+    setTimeout(() => {
+      currentQuestionIndex++;
+      loadQuestion();
+    }, 2000);
   }
 
   closeBtn.addEventListener('click', closeModal);
